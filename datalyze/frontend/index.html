@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Datalyze — Intelligent Data Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════ AUTH PAGE ══ -->
+<div id="auth-page" class="page active">
+  <div id="auth-page-inner" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
+    <div class="auth-container">
+      <div class="logo">
+        <div class="logo-mark">🧬</div>
+        <h1>Datalyze</h1>
+        <p>Transform your data into beautiful insights</p>
+      </div>
+
+      <div class="auth-card">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('login')">Sign In</button>
+          <button class="tab-btn" onclick="switchTab('register')">Create Account</button>
+        </div>
+
+        <!-- Login form -->
+        <div id="login-form">
+          <div id="login-step-1">
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="l-email" placeholder="you@example.com"/>
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" id="l-password" placeholder="Your password"/>
+            </div>
+            <button class="btn-primary" onclick="doLogin()">Continue →</button>
+          </div>
+          <div id="login-step-2" style="display:none;">
+            <div style="text-align:center;margin-bottom:20px;">
+              <div style="font-size:40px;margin-bottom:10px;">📬</div>
+              <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin-bottom:6px;">Check your email</h3>
+              <p style="color:var(--muted);font-size:13px;">We sent a 6-digit OTP to <span id="login-email-display" style="color:var(--accent);"></span></p>
+            </div>
+            <div class="form-group">
+              <label>Enter OTP</label>
+              <input type="text" id="l-otp" placeholder="000000" maxlength="6"
+                     style="text-align:center;font-size:24px;letter-spacing:8px;font-family:'Syne',sans-serif;"/>
+            </div>
+            <button class="btn-primary" onclick="doLoginVerify()">Verify & Sign In →</button>
+          </div>
+          <div id="login-msg" class="auth-msg"></div>
+        </div>
+
+        <!-- Register form -->
+        <div id="register-form" style="display:none;">
+          <div id="reg-step-1">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" id="r-name" placeholder="Your Name"/>
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="r-email" placeholder="you@example.com"/>
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" id="r-password" placeholder="Min. 6 characters"/>
+            </div>
+            <button class="btn-primary" onclick="doRegister()">Send OTP →</button>
+          </div>
+          <div id="reg-step-2" style="display:none;">
+            <div style="text-align:center;margin-bottom:20px;">
+              <div style="font-size:40px;margin-bottom:10px;">📬</div>
+              <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin-bottom:6px;">Verify your email</h3>
+              <p style="color:var(--muted);font-size:13px;">OTP sent to <span id="reg-email-display" style="color:var(--accent);"></span></p>
+            </div>
+            <div class="form-group">
+              <label>Enter OTP</label>
+              <input type="text" id="r-otp" placeholder="000000" maxlength="6"
+                     style="text-align:center;font-size:24px;letter-spacing:8px;font-family:'Syne',sans-serif;"/>
+            </div>
+            <button class="btn-primary" onclick="doVerifyOtp()">Verify & Create Account →</button>
+          </div>
+          <div id="reg-msg" class="auth-msg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ DASHBOARD PAGE ══ -->
+<div id="dashboard-page" class="page">
+
+  <!-- Top Nav -->
+  <nav class="topnav">
+    <div class="nav-logo">🧬 Datalyze</div>
+    <div class="nav-right">
+      <button class="btn-secondary" onclick="showEbookPortal()" style="padding: 6px 14px; font-size: 13px;">📚 eBook Portal</button>
+      <div class="streak-badge">
+        🔥 <span id="streak-count">0</span> day streak
+      </div>
+      <div class="user-menu-wrapper">
+        <button class="user-menu-btn" onclick="toggleDropdown()" title="Profile">⋯</button>
+        <div class="user-dropdown" id="user-dropdown">
+          <div class="dropdown-header">
+            <div class="d-name" id="dd-name">—</div>
+            <div class="d-email" id="dd-email">—</div>
+          </div>
+          <div class="dropdown-item" onclick="showStreakModal()">
+            <span class="di-icon">🔥</span>
+            <span>Streak — <strong id="dd-streak">0</strong> days</span>
+          </div>
+          <div class="dropdown-item danger" onclick="doLogout()">
+            <span class="di-icon">🚪</span>
+            <span>Sign Out</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main-content">
+
+    <!-- Upload Zone -->
+    <div class="upload-section" id="upload-section">
+      <div class="upload-zone" id="upload-zone"
+           onclick="document.getElementById('file-input').click()"
+           ondragover="dragOver(event)"
+           ondragleave="dragLeave(event)"
+           ondrop="dropFile(event)">
+        <div class="upload-icon">📊</div>
+        <h3>Drop your dataset here</h3>
+        <p>Drag & drop or click to browse your files</p>
+        <div class="file-formats">
+          <span class="fmt-badge">CSV</span>
+          <span class="fmt-badge">Excel .xlsx</span>
+          <span class="fmt-badge">JSON</span>
+        </div>
+      </div>
+      <input type="file" id="file-input" accept=".csv,.xlsx,.xls,.json" onchange="handleFile(event)"/>
+    </div>
+
+    <!-- Results Section -->
+    <div class="results-section" id="results-section">
+
+      <button class="upload-again-btn" onclick="resetToUpload()">
+        ← Analyse Another Dataset
+      </button>
+
+      <div class="results-header">
+        <div class="results-title" id="results-title">Analysis Results</div>
+        <button class="btn-download" onclick="downloadReport()">
+          ⬇ Download PDF Report
+        </button>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="stats-grid" id="stats-grid"></div>
+
+      <!-- Insights -->
+      <div class="insights-box">
+        <h3>🤖 AI Insights</h3>
+        <div id="insights-list"></div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-grid" id="charts-grid"></div>
+
+      <!-- Stats Table -->
+      <div class="stats-table-section" id="stats-table-section">
+        <div class="stats-table-header">
+          <h3>📋 Descriptive Statistics</h3>
+        </div>
+        <div class="table-scroll">
+          <table id="stats-table"></table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ EBOOK PORTAL PAGE ══ -->
+<div id="ebook-page" class="page">
+  <nav class="topnav">
+    <div class="nav-logo">🧬 Datalyze</div>
+    <div class="nav-right">
+      <button class="btn-secondary" onclick="showDashboard()" style="padding: 6px 14px; font-size: 13px;">← Back to Dashboard</button>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <div style="margin-bottom: 32px; text-align: center;">
+      <h2 style="font-family: 'Syne', sans-serif; font-size: 28px; margin-bottom: 12px;">📚 eBook Portal</h2>
+      <p style="color: var(--muted);">Unlock exclusive Data Science eBooks by maintaining your streak. (1 book unlocks every 10 streak days)</p>
+    </div>
+    
+    <div class="ebooks-grid" id="ebooks-grid">
+      <!-- Books rendered by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ TIMER OVERLAY ══ -->
+<div class="timer-overlay" id="timer-overlay">
+  <div class="timer-ring">
+    <svg width="180" height="180" viewBox="0 0 180 180">
+      <circle class="bg-circle" cx="90" cy="90" r="80"/>
+      <circle class="progress-circle" id="progress-circle" cx="90" cy="90" r="80"/>
+    </svg>
+    <div class="timer-number" id="timer-number">0s</div>
+  </div>
+  <div class="timer-label">Analysing your dataset…</div>
+  <div class="timer-sublabel">Running AI-powered analysis in the background</div>
+  <div class="timer-steps">
+    <div class="timer-step active" id="step-read">📂 Reading file</div>
+    <div class="timer-step" id="step-clean">🧹 Cleaning data</div>
+    <div class="timer-step" id="step-viz">📊 Generating charts</div>
+    <div class="timer-step" id="step-done">✅ Done</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ STREAK MODAL ══ -->
+<div class="streak-modal" id="streak-modal">
+  <div class="streak-modal-inner">
+    <div class="big-emoji">🔥</div>
+    <h2>Streak Updated!</h2>
+    <p>You've been consistently analysing data</p>
+    <span class="streak-num" id="modal-streak">0</span>
+    <p style="margin-bottom:24px;font-size:13px;color:var(--gold);">day streak</p>
+    <button class="btn-secondary" onclick="closeStreakModal()">Awesome!</button>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
